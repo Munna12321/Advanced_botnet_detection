@@ -1,0 +1,13 @@
+Flask==2.3.3
+requests==2.31.0
+scapy==2.5.0
+python-dotenv==1.0.1
+gunicorn==21.2.0
+
+# For timezone handling (Python 3.9+ includes zoneinfo)
+tzdata==2023.3
+
+# If you use SQLite (default in Python, no extra driver needed)
+# If you switch to MySQL or PostgreSQL later, use one of the below:
+# mysqlclient==2.2.1
+# psycopg2-binary==2.9.9

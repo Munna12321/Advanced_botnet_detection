@@ -1,0 +1,7 @@
+        # Too many open ports --min 4 
+        # Excessive failed login attempts --min 4(brute force)
+        # Unusual Process Detection -- examples of whitelist process  ['bash', 'ssh', 'python', 'systemd']
+        # Time-Based Behavior -- if anyone using connecting between 1 am to 6 am then it will detect
+        #  one ip accessing too many ports
+        # Flood Detection -overwhelming server
+	#Unusual Port Access Detection -  [4444, 1337, 5555, 8080]  # Common suspicious ports

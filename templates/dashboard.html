@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Botnet Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Function to fetch AbuseIPDB alerts
+        function fetchAlerts() {
+    fetch('/get_alerts')
+        .then(response => response.json())
+        .then(data => {
+            let tableBody = document.getElementById("alertTableBody");
+            tableBody.innerHTML = "";
+            data.forEach(row => {
+                let tr = `<tr>
+                            <td>${row[0]}</td>  <!-- IP -->
+                            <td>${row[1]}</td>  <!-- Reason -->
+                            <td>${row[2]}</td>  <!-- Timestamp -->
+                            <td>${row[3]}</td>  <!-- Country -->
+                            <td>${row[4]}</td>  <!-- ISP -->
+                          </tr>`;
+                tableBody.innerHTML += tr;
+            });
+        })
+        .catch(error => console.error('Error fetching alerts:', error));
+}
+
+
+        // Function to fetch Client Logs
+        function fetchClientLogs() {
+            fetch('/get_client_logs')
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.getElementById("clientLogsTableBody");
+                    tableBody.innerHTML = "";
+                    data.forEach(row => {
+                        let tr = `<tr>
+                                    <td>${row[0]}</td>
+                                    <td>${row[1]}</td>
+                                  </tr>`;
+                        tableBody.innerHTML += tr;
+                    });
+                })
+                .catch(error => console.error('Error fetching client logs:', error));
+        }
+
+        // Function to fetch Malicious Logs
+        function fetchMaliciousLogs() {
+            fetch('/get_malicious_logs')
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.getElementById("maliciousTableBody");
+                    tableBody.innerHTML = "";
+                    data.forEach(row => {
+                        let tr = `<tr>
+                                    <td>${row[0]}</td>
+                                    <td>${row[2]}</td>
+                                    <td>${row[1]}</td>
+                                  </tr>`;
+                        tableBody.innerHTML += tr;
+                    });
+                })
+                .catch(error => console.error('Error fetching malicious logs:', error));
+        }
+
+        // Function to fetch and render Prediction Chart
+        let predictionChart;  // Declare chart globally
+
+function fetchPredictionStats() {
+    fetch('/get_prediction_stats')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+
+            if (predictionChart) {
+                predictionChart.destroy();  // Destroy old chart
+            }
+
+            predictionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Normal', 'Malicious'],
+                    datasets: [{
+                        label: 'Log Count',
+                        data: [data.normal, data.malicious],
+                        backgroundColor: ['#4CAF50', '#F44336']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Prediction Summary' }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching prediction stats:', error));
+}
+
+let attackTypeChart;
+
+function fetchAndUpdateChart() {
+    fetch("/get_attack_type_stats")
+        .then(response => response.json())
+        .then(data => {
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+
+            if (attackTypeChart) {
+                // Update existing chart
+                attackTypeChart.data.labels = labels;
+                attackTypeChart.data.datasets[0].data = values;
+                attackTypeChart.update();
+            } else {
+                // Create new chart
+                attackTypeChart = new Chart(document.getElementById("attackTypeChart"), {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "Attack Type Distribution",
+                            data: values,
+                            backgroundColor: [
+                                '#ff6384', '#36a2eb', '#cc65fe',
+                                '#ffce56', '#2ecc71', '#e67e22', '#95a5a6'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Detected Attack Types'
+                            }
+                        }
+                    }
+                });
+            }
+        });
+}
+
+// Initial fetch
+
+
+        // Refresh logs every 5 seconds
+        setInterval(fetchAlerts, 5000);
+        setInterval(fetchClientLogs, 5000);
+        setInterval(fetchMaliciousLogs, 5000);
+        setInterval(fetchPredictionStats, 5000);
+        setInterval(fetchAndUpdateChart, 5000);
+
+        // Load everything on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchAlerts();
+            fetchMaliciousLogs();
+            fetchClientLogs();
+            fetchPredictionStats();
+            fetchAndUpdateChart();
+        });
+    </script>
+    <style>
+        canvas {
+            max-width: 400px;
+            max-height: 300px;
+            margin: 10px auto;
+            display: block;
+        }
+    </style>
+    
+</head>
+<body>
+    <h1>Real-Time Botnet Monitoring Dashboard</h1>
+
+    <h2>AbuseIPDB Alerts</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>IP Address</th>
+                <th>Reason</th>
+                <th>Timestamp</th>
+                <th>Country</th>
+                <th>ISP</th>
+            </tr>
+        </thead>
+        
+        <tbody id="alertTableBody"></tbody>
+    </table>
+
+    <h2>Malicious Client Logs</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Client ID</th>
+                <th>Reason</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody id="maliciousTableBody"></tbody>
+    </table>
+
+    <h2>Client Logs</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Client ID</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody id="clientLogsTableBody"></tbody>
+    </table>
+
+    <h2>Prediction Summary</h2>
+    <canvas id="predictionChart" width="400" height="200"></canvas>
+    <h3>Detected Attack Types</h3>
+    <canvas id="attackTypeChart" width="400" height="400"></canvas>
+
+</body>
+</html>

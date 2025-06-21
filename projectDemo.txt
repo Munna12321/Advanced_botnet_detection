@@ -1,0 +1,162 @@
+1️⃣ Unusual Process
+(Detects process not in whitelist ['bash', 'ssh', 'python', 'systemd'])
+
+bash
+Copy
+Edit
+curl -X POST http://172.20.10.3:5000/receive_logs \
+-H "Content-Type: application/json" \
+-d '{
+  "client_id": "TEST_UNUSUAL_PROCESS",
+  "timestamp": "2025-04-14 10:00:00",
+  "running_processes": ["bash", "python", "malware.exe"],
+  "open_ports": [22, 80],
+  "failed_logins": []
+}'
+2️⃣ Too Many Open Ports
+(Triggers if port list has more than the defined threshold—add MULTIPLE_PORT_THRESHOLD = 10 if it's missing)
+
+bash
+Copy
+Edit
+curl -X POST http://172.20.10.3:5000/receive_logs \
+-H "Content-Type: application/json" \
+-d '{
+  "client_id": "TEST_TOO_MANY_PORTS",
+  "timestamp": "2025-04-14 10:05:00",
+  "running_processes": ["bash", "python"],
+  "open_ports": [21,22,23,24,25,26,27,28,29,30,31],
+  "failed_logins": []
+}'
+3️⃣ Excessive Failed Login Attempts
+(Triggers if failed_logins.length > 4)
+
+bash
+Copy
+Edit
+curl -X POST http://172.20.10.3:5000/receive_logs \
+-H "Content-Type: application/json" \
+-d '{
+  "client_id": "TEST_FAILED_LOGINS",
+  "timestamp": "2025-04-14 10:10:00",
+  "running_processes": ["bash", "python"],
+  "open_ports": [22],
+  "failed_logins": [
+    {"ip": "10.0.0.1", "timestamp": "2025-04-14T10:00:01"},
+    {"ip": "10.0.0.1", "timestamp": "2025-04-14T10:00:02"},
+    {"ip": "10.0.0.1", "timestamp": "2025-04-14T10:00:03"},
+    {"ip": "10.0.0.1", "timestamp": "2025-04-14T10:00:04"},
+    {"ip": "10.0.0.1", "timestamp": "2025-04-14T10:00:05"}
+  ]
+}'
+4️⃣ Suspicious Time-Based Behavior
+(Triggers if the time is between 1 AM and 6 AM)
+
+bash
+Copy
+Edit
+curl -X POST http://172.20.10.3:5000/receive_logs \
+-H "Content-Type: application/json" \
+-d '{
+  "client_id": "TEST_ODD_HOURS",
+  "timestamp": "2025-04-14 02:00:00",
+  "running_processes": ["bash", "python"],
+  "open_ports": [22],
+  "failed_logins": []
+}'
+5️⃣ Port Scan Detection
+(Triggers if same IP accesses more than 3 ports)
+
+bash
+Copy
+Edit
+curl -X POST http://172.20.10.3:5000/receive_logs \
+-H "Content-Type: application/json" \
+-d '{
+  "client_id": "TEST_PORT_SCAN",
+  "timestamp": "2025-04-14 10:15:00",
+  "running_processes": ["bash", "python"],
+  "open_ports": [
+    {"ip": "192.168.1.10", "port": 21},
+    {"ip": "192.168.1.10", "port": 22},
+    {"ip": "192.168.1.10", "port": 23},
+    {"ip": "192.168.1.10", "port": 24}
+  ],
+  "failed_logins": []
+}'
+
+
+7️⃣ Unusual Port Access
+(Triggers if any port is one of [4444, 1337, 5555, 8080])
+
+bash
+Copy
+Edit
+curl -X POST http://172.20.10.3:5000/receive_logs \
+-H "Content-Type: application/json" \
+-d '{
+  "client_id": "TEST_UNUSUAL_PORT",
+  "timestamp": "2025-04-14 10:25:00",
+  "running_processes": ["bash", "python"],
+  "open_ports": [22, 4444],
+  "failed_logins": []
+}'
+
+8)-----
+
+curl -X POST http://172.20.10.3:5000/receive_logs \
+-H "Content-Type: application/json" \
+-d '{
+  "client_id": "REPEATED_MALICIOUS_TEST",
+  "timestamp": "2025-04-14 11:34:2",
+  "running_processes": ["bash"],
+  "open_ports": [],
+  "failed_logins": []
+}'
+
+
+
+
+
+normal-----
+
+curl -X POST http://172.20.10.3:5000/receive_logs \
+-H "Content-Type: application/json" \
+-d '{
+  "client_id": "TEST_UNUSUAL_PORT_NORMAL",
+  "timestamp": "2025-04-14 12:00:00",
+  "running_processes": ["bash"],
+  "open_ports": [22, 80],
+  "failed_logins": []
+}'
+
+
+curl -X POST http://172.20.10.3:5000/receive_logs \
+-H "Content-Type: application/json" \
+-d '{
+  "client_id": "TEST_FLOOD_NORMAL",
+  "timestamp": "2025-04-14 11:30:00",
+  "running_processes": ["bash"],
+  "open_ports": [22],
+  "failed_logins": [{"ip": "10.0.0.5"}]
+}'
+
+
+
+
+
+for i in {1..60}; do nc -vz 127.0.0.1 80 & done
+
+
+for port in {7001..7005}; do nc 172.20.10.3 $port & done
+
+
+sudo python3 -m http.server 8001 &
+sudo nc -lvp 8002 &
+sudo nc -lvp 8003 &
+sudo nc -lvp 8004 &
+sudo nc -lvp 8005 &
+sudo nc -lvp 8006 &
+
+
+gedit
